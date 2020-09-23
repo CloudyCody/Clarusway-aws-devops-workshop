@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This Template creates a web server.
+  
+Parameters:
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+  
+Resources:
+  RomenWebsiteInstance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: ami-0c94855ba95c71c99
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !GetAtt RomenWebsiteSG.GroupId
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            mkdir website
+            yum update -y
+            yum install python3 -y
+            pip3 install Flask
+            wget https://raw.githubusercontent.com/mustyfdn/fdn_aws_workshop/master/aws/projects/001-roman-numerals-converter/romen_numerals.py
+            wget https://raw.githubusercontent.com/mustyfdn/fdn_aws_workshop/master/aws/projects/001-roman-numerals-converter/app.py
+            mkdir templates ; cd templates
+            wget https://raw.githubusercontent.com/mustyfdn/fdn_aws_workshop/master/aws/projects/001-roman-numerals-converter/templates/index.html
+            wget https://raw.githubusercontent.com/mustyfdn/fdn_aws_workshop/master/aws/projects/001-roman-numerals-converter/templates/result.html
+            cd ..
+            python3 ./app.py
+
+
+  RomenWebsiteSG:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: SSH and HTTP #required
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          IpProtocol: TCP
+          ToPort: 80
+        - IpProtocol: TCP
+          CidrIp: 0.0.0.0/0
+          FromPort: 22
+          ToPort: 22

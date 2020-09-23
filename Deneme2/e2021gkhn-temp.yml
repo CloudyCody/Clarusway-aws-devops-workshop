@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: This template creates an EC2 instance which enables SSH connection. 
+
+Resources:
+  e2021gkhn:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0cebb45b34604efb8
+      InstanceType: t2.micro
+      KeyName: e
+      SecurityGroups:
+        - e2021gkhnproje1
+      Tags:
+        - Key: Name
+          Value: e2021gkhn-cf-instance
+      
