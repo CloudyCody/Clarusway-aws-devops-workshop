@@ -45,3 +45,17 @@ Resources:
           CidrIp: 0.0.0.0/0
           FromPort: 22
           ToPort: 22
+Outputs:
+  InstanceId:
+    Description: InstanceId of the first EC2 instance
+    Value: !Ref RomenWebsiteInstance
+  PublicDNS:
+    Description: Public DNS Name of the EC2 instance
+    Value: !GetAtt 
+      - RomenWebsiteInstance
+      - PublicDnsName
+  PublicIP:
+    Description: Public IP address of the EC2 instance
+    Value: !GetAtt 
+      - RomenWebsiteInstance
+      - PublicIp
