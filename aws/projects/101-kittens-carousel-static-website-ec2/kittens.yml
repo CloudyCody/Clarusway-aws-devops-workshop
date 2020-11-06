@@ -1,34 +1,38 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template creates an EC2 instance to run a static website aplication deployed with Apache Web Server
-  
-  
+Description: This template creates an EC2 instance to run a static website application deployed with Apache Web Server
+   
 Resources:
   WebServerSecurityGroup:
-    Type: "AWS::EC2::SecurityGroup"
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: BaseSecurityGroup
-      GroupName: ApacheSecurityGroup
+      GroupDescription: Allow http to client host
+      GroupName: ApacheSG
+      Tags:
+        - Key: Name
+          Value: Apache
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-      KittenCarousel:
-        Type: "AWS::EC2::Instance"
-        Properties:
-          ImageId: ami-0cebb45b34604efb8
-          InstanceType: t2.micro
-          KeyName: e
-          Tags:
-            - Key: Name
-              Value: ApacheWebEC2
-          UserData: 
-           Fn::Base64:
-            !Sub |
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0       
+  KittensCarouselStaticWebsiteCFInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0cebb45b34604efb8
+      InstanceType: t2.micro
+      KeyName: e
+      SecurityGroupIds:
+        - HTTPandSSH
+      Tags:
+        - Key: Name
+          Value: ApacheWebEC2
+      UserData: 
+        Fn::Base64:
+          !Sub |
             #! /bin/bash
             yum update -y
             yum install -y httpd
@@ -40,5 +44,17 @@ Resources:
             wget https://raw.githubusercontent.com/E2021-Gokhan/Clarusway-aws-devops-workshop/master/aws/projects/101-kittens-carousel-static-website-ec2/static-web/cat2.jpg
             systemctl start httpd
             systemctl enable httpd
-      
-  
+Outputs:
+  InstanceId:
+    Description: InstanceId of the first EC2 instance
+    Value: !Ref KittensCarouselStaticWebsiteCFInstance
+  PublicDNS:
+    Description: Public DNS Name of the EC2 instance
+    Value: !GetAtt 
+      - KittensCarouselStaticWebsiteCFInstance
+      - PublicDnsName
+  PublicIP:
+    Description: Public IP address of the EC2 instance
+    Value: !GetAtt 
+      - KittensCarouselStaticWebsiteCFInstance
+      - PublicIp
